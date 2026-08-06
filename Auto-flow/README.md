@@ -1,54 +1,311 @@
 # AutoFlow 0.6 MVP
 
-AutoFlow 是一个在本机运行的通用电脑 Agent。连接任一支持的模型后，它会持续执行“观察—思考—行动—验证”循环，而不是把指令匹配到少量写死功能。界面分为首页、任务中心和模型中心三个独立页面。
+AutoFlow is a general-purpose Windows desktop AI agent. After connecting a supported language model, it continuously follows an observe, plan, act, and verify loop instead of matching requests to a small set of hard-coded actions.
 
-## 模型中心
+The local web interface provides separate Home, Task Center, and Model Center pages.
 
-- 11 个明确入口：DeepSeek、Kimi 中国区、Kimi 国际区、OpenAI、OpenRouter、硅基流动、智谱 GLM、阿里云百炼、火山方舟、Ollama 和自定义接口
-- 常规服务商输入 API Key 后自动读取账户可用模型
-- 火山方舟明确要求 API Key + 模型或 Endpoint ID
-- 本机 Ollama 无需 API Key
-- 其他 OpenAI 兼容接口：可自定义接口地址、模型 ID，API Key 可选
-- 支持可选的 Account / Project ID 和自定义请求头名称
-- 连接后直接切换模型，不需要重新输入 Key
-- 所有凭据仅保存在 Windows 凭据库
+## Core Capabilities
 
-## 通用 Agent
+- Observe active windows, visible windows, and Windows UI Automation controls
+- Locate and click controls dynamically without prerecorded mouse coordinates
+- Switch windows and open applications, files, folders, and URLs
+- Enter text and execute keyboard shortcuts
+- List directories, filter files, and read local text files
+- Convert PDF documents to text
+- Execute registered PowerShell operations within permission boundaries
+- Observe the computer again after every action and continue planning
+- Run tasks for up to 40 steps
+- Display task progress, final responses, connection errors, and permission failures
+- Provide emergency stopping and task-level authorization controls
 
-- 读取当前活动窗口、可见窗口及 Windows UI Automation 控件
-- 通过控件编号动态点击，不依赖预先录制的鼠标位置
-- 切换窗口、打开应用/文件/文件夹/网址、输入文字和发送快捷键
-- 查看目录、筛选文件并读取本地文本
-- 在没有专用能力时提出受确认保护的 PowerShell 操作
-- 每次行动后重新观察，并根据真实结果继续规划
-- 支持最多 40 步、任务进度、用户补充信息、权限确认和紧急停止
-- 模型或网络不可用时会明确提示连接状态
+## Model Providers
 
-## 全自动与安全边界
+AutoFlow provides eleven explicit model-provider entries:
 
-- 发送目标即代表对完成该任务所需步骤进行任务级授权，不逐步弹出确认
-- 输入、快捷键、坐标点击和非破坏性 PowerShell 会自动连续执行
-- 原始目标明确要求的删除、覆盖、发送、提交或支付动作可自动执行
-- 未在原始目标中声明的高风险副作用会被自动阻止，而不是弹窗询问
-- 模型只能调用注册过的工具，不能自行获得额外系统权限
-- 模型凭据仅保存在 Windows 凭据库，不写入项目或日志
+1. DeepSeek
+2. Kimi China
+3. Kimi Global
+4. OpenAI
+5. OpenRouter
+6. SiliconFlow
+7. Zhipu GLM
+8. Alibaba Cloud Model Studio
+9. Volcengine Ark
+10. Ollama
+11. Custom OpenAI-compatible endpoint
 
-## 启动
+Cloud providers require the appropriate API credentials. Ollama can run locally without an API key. Custom providers support a configurable endpoint URL, model ID, and optional credentials.
 
-Windows 用户可以直接双击 `启动AutoFlow.bat`。首次启动会自动创建虚拟环境并安装依赖。
+All saved credentials are stored in Windows Credential Manager and are not written to project files or logs.
+
+## Environment Requirements
+
+- Windows 10 or Windows 11
+- Python 3.10 or newer
+- Internet access for cloud model providers
+- A locally installed Ollama service when using local Ollama models
+
+## Dependencies
+
+The primary dependencies are:
+
+- Typer
+- Pydantic
+- Rich
+- Requests
+- PyYAML
+- OpenAI Python SDK
+- pynput
+- PyAutoGUI
+- pypdf
+- keyring
+- pywinauto
+
+Development and testing additionally use pytest and ReportLab. Exact dependency versions are defined in `pyproject.toml`.
+
+## Installation
+
+Clone or download the project, open PowerShell in the `Auto-flow` directory, and run:
 
 ```powershell
-pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
+```
+
+Windows users can also double-click `启动AutoFlow.bat`. On the first launch, the script creates a virtual environment and installs the required dependencies.
+
+## Running AutoFlow
+
+Start the local interface with:
+
+```powershell
 autoflow-gui
 ```
 
-打开 `http://127.0.0.1:8765/`。在“模型中心”连接服务，在“任务中心”执行电脑任务。
+Then open:
 
-## 测试
+```text
+http://127.0.0.1:8765/
+```
+
+Use the Model Center to connect a model provider. Use the Task Center to enter and execute computer tasks.
+
+## Local Deployment
+
+For a fully local deployment, AutoFlow can connect to:
+
+- Ollama running on the same computer
+- A local OpenAI-compatible inference server
+- A model server available on the local network
+
+This allows task planning to remain local when a compatible local model and inference runtime are available.
+
+## Autonomous Execution and Safety
+
+- Sending a goal provides task-level authorization for the actions required to complete that goal.
+- Keyboard input, shortcuts, coordinate actions, and non-destructive PowerShell operations can run automatically.
+- Destructive or externally consequential actions must be explicitly authorized by the original goal.
+- High-risk actions outside the original goal are blocked automatically.
+- Models can only use registered AutoFlow tools and cannot obtain additional system permissions.
+- Credentials remain in Windows Credential Manager.
+
+## Testing
+
+Run the automated tests:
 
 ```powershell
 pytest
+```
+
+Run the MVP demonstration:
+
+```powershell
 python examples/demo_mvp.py
 ```
 
-旧的坐标录制模块和 PDF 转 TXT 专用执行器仍保留为离线备用能力。
+Current verified result:
+
+```text
+40 passed
+```
+
+## AMD Radeon / ROCm Status
+
+The current development computer does not contain an AMD Radeon GPU. Therefore, physical AMD Radeon/ROCm execution and performance have not been verified.
+
+AutoFlow supports a proposed AMD deployment through a ROCm-compatible inference server exposed through an OpenAI-compatible API. The deployment and inference-optimization plan is documented in:
+
+```text
+submission/PROJECT_SPECIFICATION.md
+```
+
+No fabricated AMD hardware performance results are included in this submission.
+
+## Known Limitations
+
+- Cloud models require network access.
+- Desktop automation against elevated applications may require AutoFlow to run with matching permissions.
+- Background interaction depends on the Windows message support of the target application.
+- Model reliability affects the quality of task planning.
+- AMD Radeon/ROCm hardware performance has not been physically verified.
+
+## Additional Materials
+
+- Project specification: `submission/PROJECT_SPECIFICATION.md`
+- Release information: `MVP_RELEASE.md`
+- Presentation: `AutoFlow_AMD_Track2_Presentation.pptx`
+- Demo video: https://youtu.be/YrQ2k2cNXjo# AutoFlow 0.6 MVP
+
+AutoFlow is a general-purpose Windows desktop AI agent. After connecting a supported language model, it continuously follows an observe, plan, act, and verify loop instead of matching requests to a small set of hard-coded actions.
+
+The local web interface provides separate Home, Task Center, and Model Center pages.
+
+## Core Capabilities
+
+- Observe active windows, visible windows, and Windows UI Automation controls
+- Locate and click controls dynamically without prerecorded mouse coordinates
+- Switch windows and open applications, files, folders, and URLs
+- Enter text and execute keyboard shortcuts
+- List directories, filter files, and read local text files
+- Convert PDF documents to text
+- Execute registered PowerShell operations within permission boundaries
+- Observe the computer again after every action and continue planning
+- Run tasks for up to 40 steps
+- Display task progress, final responses, connection errors, and permission failures
+- Provide emergency stopping and task-level authorization controls
+
+## Model Providers
+
+AutoFlow provides eleven explicit model-provider entries:
+
+1. DeepSeek
+2. Kimi China
+3. Kimi Global
+4. OpenAI
+5. OpenRouter
+6. SiliconFlow
+7. Zhipu GLM
+8. Alibaba Cloud Model Studio
+9. Volcengine Ark
+10. Ollama
+11. Custom OpenAI-compatible endpoint
+
+Cloud providers require the appropriate API credentials. Ollama can run locally without an API key. Custom providers support a configurable endpoint URL, model ID, and optional credentials.
+
+All saved credentials are stored in Windows Credential Manager and are not written to project files or logs.
+
+## Environment Requirements
+
+- Windows 10 or Windows 11
+- Python 3.10 or newer
+- Internet access for cloud model providers
+- A locally installed Ollama service when using local Ollama models
+
+## Dependencies
+
+The primary dependencies are:
+
+- Typer
+- Pydantic
+- Rich
+- Requests
+- PyYAML
+- OpenAI Python SDK
+- pynput
+- PyAutoGUI
+- pypdf
+- keyring
+- pywinauto
+
+Development and testing additionally use pytest and ReportLab. Exact dependency versions are defined in `pyproject.toml`.
+
+## Installation
+
+Clone or download the project, open PowerShell in the `Auto-flow` directory, and run:
+
+```powershell
+python -m pip install -e ".[dev]"
+```
+
+Windows users can also double-click `启动AutoFlow.bat`. On the first launch, the script creates a virtual environment and installs the required dependencies.
+
+## Running AutoFlow
+
+Start the local interface with:
+
+```powershell
+autoflow-gui
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8765/
+```
+
+Use the Model Center to connect a model provider. Use the Task Center to enter and execute computer tasks.
+
+## Local Deployment
+
+For a fully local deployment, AutoFlow can connect to:
+
+- Ollama running on the same computer
+- A local OpenAI-compatible inference server
+- A model server available on the local network
+
+This allows task planning to remain local when a compatible local model and inference runtime are available.
+
+## Autonomous Execution and Safety
+
+- Sending a goal provides task-level authorization for the actions required to complete that goal.
+- Keyboard input, shortcuts, coordinate actions, and non-destructive PowerShell operations can run automatically.
+- Destructive or externally consequential actions must be explicitly authorized by the original goal.
+- High-risk actions outside the original goal are blocked automatically.
+- Models can only use registered AutoFlow tools and cannot obtain additional system permissions.
+- Credentials remain in Windows Credential Manager.
+
+## Testing
+
+Run the automated tests:
+
+```powershell
+pytest
+```
+
+Run the MVP demonstration:
+
+```powershell
+python examples/demo_mvp.py
+```
+
+Current verified result:
+
+```text
+40 passed
+```
+
+## AMD Radeon / ROCm Status
+
+The current development computer does not contain an AMD Radeon GPU. Therefore, physical AMD Radeon/ROCm execution and performance have not been verified.
+
+AutoFlow supports a proposed AMD deployment through a ROCm-compatible inference server exposed through an OpenAI-compatible API. The deployment and inference-optimization plan is documented in:
+
+```text
+submission/PROJECT_SPECIFICATION.md
+```
+
+No fabricated AMD hardware performance results are included in this submission.
+
+## Known Limitations
+
+- Cloud models require network access.
+- Desktop automation against elevated applications may require AutoFlow to run with matching permissions.
+- Background interaction depends on the Windows message support of the target application.
+- Model reliability affects the quality of task planning.
+- AMD Radeon/ROCm hardware performance has not been physically verified.
+
+## Additional Materials
+
+- Project specification: `submission/PROJECT_SPECIFICATION.md`
+- Release information: `MVP_RELEASE.md`
+- Presentation: `AutoFlow_AMD_Track2_Presentation.pptx`
+- Demo video: https://youtu.be/YrQ2k2cNXjo
