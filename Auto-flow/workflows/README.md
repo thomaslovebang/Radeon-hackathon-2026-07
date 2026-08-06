@@ -1,26 +1,25 @@
-# Lobster 工作流 (预留)
+# Reserved Workflow Integration
 
-> 对应 spec `autoflow_spec_lobster_integration.md` (v2.1)。
-> MVP 阶段 CLI 直接调用 OpenAdapt，此目录预留 Lobster 编排集成。
+This directory is reserved for future workflow-orchestration integration.
 
-## 说明
+## Overview
 
-Lobster 是 OpenClaw 原生的 YAML 工作流引擎，提供：
-- 步骤编排 (steps / run)
-- 审批门控 (approval: required)
-- 条件分支 (when / condition)
-- 数据传递 ($stepId.stdout / $stepId.json)
-- 恢复机制 (resumeToken)
+A workflow engine can provide:
 
-## 计划工作流
+- Step orchestration
+- Approval gates
+- Conditional branches
+- Data transfer between steps
+- Resume and recovery mechanisms
 
-| 文件 | 用途 |
-|------|------|
-| `learn-skill.lobster` | 演示录制 -> 编译 -> 注册 |
-| `run-skill.lobster` | 语义匹配 -> 参数注入 -> replay |
-| `repair-skill.lobster` | Halt -> 诊断 -> 审批 -> 版本化 |
+## Planned Workflows
 
-## 集成方式
+| File | Purpose |
+|---|---|
+| `learn-skill.lobster` | Record a demonstration, compile it, and register the resulting skill |
+| `run-skill.lobster` | Match a skill, inject parameters, and execute deterministic replay |
+| `repair-skill.lobster` | Diagnose a halted workflow, request approval, and create a repaired version |
 
-MVP 阶段 CLI 命令已实现等价逻辑 (create/run/repair)，后续可通过 Lobster
-将这些 CLI 命令串成带审批门控的完整工作流。
+## Current MVP Status
+
+The AutoFlow 0.6 MVP currently provides equivalent functionality through its Python modules and command-line interface. Workflow-engine integration is reserved for future development.
