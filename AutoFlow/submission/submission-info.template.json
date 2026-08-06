@@ -1,0 +1,15 @@
+{
+  "team_name": "",
+  "members": [
+    {
+      "name": "",
+      "contribution": ""
+    }
+  ],
+  "demo_video_url": "",
+  "registrations": {
+    "luma": false,
+    "amd_developer_program": false
+  },
+  "license_confirmed": false
+}
